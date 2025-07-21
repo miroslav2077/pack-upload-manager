@@ -29,13 +29,12 @@ export const actions = {
       return fail(400, { form });
     }
 
-    // TODO save file locally
 
     const filePath = await saveFileLocally(form.data.file);
 
     try {
       // save data to DB
-      const dbData = { ...form.data, filePath }; // TODO implement local/cloud storage logic
+      const dbData = { ...form.data, filePath }; // TODO implement cloud storage logic
       delete dbData.file;
       
       await prisma.upload.create({
