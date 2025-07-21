@@ -1,11 +1,22 @@
 import { message, superValidate, fail } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { UploadSchema } from '$lib/schemas';
+import prisma from '$lib/prisma';
+import { error } from '@sveltejs/kit';
 
 export const load = async () => {
-  const form = await superValidate(zod4(UploadSchema));
+  try {
+    const form = await superValidate(zod4(UploadSchema));
 
-  return { form };
+    const results = await prisma.upload.findMany({
+      orderBy: { createdAt: 'desc' } // latest uploads first
+    });
+
+    return { form, results };
+  } catch (err) {
+    console.error('Load function failed:', err);
+    throw error(500, 'Failed to load form and/or fetch uploaded resources.');
+  }
 };
 
 export const actions = {
@@ -19,8 +30,19 @@ export const actions = {
 
     // TODO save file locally
 
-    // TODO save data to DB
+    try {
+      // save data to DB
+      const dbData = { ...form.data, filePath: '' }; // TODO implement local/cloud storage logic
+      delete dbData.file;
+      
+      await prisma.upload.create({
+        data: dbData
+      });
 
-    return message(form, 'Resource uploaded successfully!');
+      return message(form, 'Resource uploaded successfully!'); 
+    } catch (err) {
+      console.error('Database error:', err);
+      return fail(500, { form, message: 'An unexpected error occurred while saving the data.'});
+    }
   }
 };
