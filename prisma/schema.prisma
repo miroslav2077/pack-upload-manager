@@ -16,13 +16,22 @@ datasource db {
 }
 
 model Upload {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  category    String
-  language    String
-  provider    String
-  roles       String[]
-  filePath    String
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  category      String
+  language      String
+  provider      String
+  roles         String[]
+  storage       StorageType @default(CLOUD)
+  filePath       String       // local path or s3 key
+  originalName  String       // original filename (e.g. resume.pdf)
+  mimeType      String
+  size          Int          // in bytes
+  createdAt     DateTime     @default(now())
+}
+
+enum StorageType {
+  LOCAL
+  CLOUD
 }
