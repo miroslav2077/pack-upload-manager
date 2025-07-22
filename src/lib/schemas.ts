@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { MAX_FILE_SIZE } from './utils';
 
 // Accepted values
 export const categoryOptions = ['Leadership', 'Managing Complexity'] as const;
@@ -24,6 +25,9 @@ export const UploadSchema = z.object({
     .any()
     .refine((file) => file instanceof File && file.size > 0, {
       message: 'File is required',
+    })
+    .refine((file) => file.size <= MAX_FILE_SIZE, {
+      message: 'File must be smaller than 80MB',
     }),
 });
 
