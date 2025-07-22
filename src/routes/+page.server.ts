@@ -10,7 +10,8 @@ export const load = async () => {
     const form = await superValidate(zod4(UploadSchema));
 
     const results = await prisma.upload.findMany({
-      orderBy: { createdAt: 'desc' } // latest uploads first
+      orderBy: { createdAt: 'desc' }, // latest uploads first
+      take: 100,
     });
 
     return { form, results };
