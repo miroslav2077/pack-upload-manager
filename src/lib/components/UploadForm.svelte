@@ -13,7 +13,7 @@
 	import { Textarea } from '$lib/components/ui/textarea/index';
 	import { Button } from '$lib/components/ui/button/index';
 
-	let fileInput = $state<HTMLInputElement | undefined>();
+	let fileInput = $state<HTMLElement | null>(null);
 	let selectedFile = $state<FileList | undefined>();
 
 	function triggerFileSelect() {
@@ -56,7 +56,7 @@
 				<Input
 					{...props}
 					type="text"
-					placeholder="Title"
+					placeholder="Title*"
 					bind:value={$formData.title}
 					class="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 				/>
@@ -70,9 +70,9 @@
 			{#snippet children({ props })}
 				<Textarea
 					{...props}
-					placeholder="Description"
+					placeholder="Description*"
 					bind:value={$formData.description}
-					class="resize-vertical min-h-[100px] w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					class="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 				></Textarea>
 			{/snippet}
 		</Form.Control>
@@ -82,7 +82,7 @@
 	<Form.Field {form} name="category">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Select.Root type="single" bind:value={$formData.category} name={props.name} required>
+				<Select.Root type="single" bind:value={$formData.category} name={props.name}>
 					<Select.Trigger
 						{...props}
 						class="w-full rounded border border-gray-300 px-3 py-2 text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -103,7 +103,7 @@
 	<Form.Field {form} name="language">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Select.Root type="single" bind:value={$formData.language} name={props.name} required>
+				<Select.Root type="single" bind:value={$formData.language} name={props.name}>
 					<Select.Trigger
 						{...props}
 						class="w-full rounded border border-gray-300 px-3 py-2 text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -124,7 +124,7 @@
 	<Form.Field {form} name="provider">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Select.Root type="single" bind:value={$formData.provider} name={props.name} required>
+				<Select.Root type="single" bind:value={$formData.provider} name={props.name}>
 					<Select.Trigger
 						{...props}
 						class="w-full rounded border border-gray-300 px-3 py-2 text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -145,7 +145,7 @@
 	<Form.Field {form} name="roles">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Select.Root type="multiple" bind:value={$formData.roles} name={props.name} required>
+				<Select.Root type="multiple" bind:value={$formData.roles} name={props.name}>
 					<Select.Trigger
 						{...props}
 						class="w-full rounded border border-gray-300 px-3 py-2 text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -167,19 +167,20 @@
 		<Form.Control>
 			{#snippet children({ props })}
 				<div class="flex items-center gap-2">
-					<!-- <div class="flex-1 rounded border border-gray-300 bg-gray-50 px-3 py-2 text-gray-500">
-						{#if fileInfo}
-							<p class="text-sm">{fileInfo.name} ({fileInfo.size})</p>
-						{:else}
-							No file selected*
-						{/if}
-					</div> -->
 					<Input
 						{...props}
+						type="text"
+						placeholder="No file selected*"
+						value={fileInfo ? `${fileInfo.name} (${fileInfo.size})` : ''}
+						class="pointer-events-none w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					/>
+					<Input
+						{...props}
+						bind:ref={fileInput}
 						bind:this={$formData.file}
 						bind:files={selectedFile}
 						type="file"
-						required
+						class="hidden"
 					/>
 					<Button onclick={triggerFileSelect} variant="secondary">Select file</Button>
 				</div>

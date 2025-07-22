@@ -2,10 +2,12 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import * as Card from '$lib/components/ui/card/index';
-	import * as Table from '$lib/components/ui/table/index';
 	import UploadForm from '$lib/components/UploadForm.svelte';
 	import type { PageProps } from './$types';
 	import { toast } from 'svelte-sonner';
+	import DataTable from '$lib/components/DataTable.svelte';
+	import * as Table from '$lib/components/ui/table/index';
+	import { formatDateTime } from '$lib/utils';
 	let { data }: PageProps = $props();
 
 	let open = $state<boolean>(false);
@@ -14,10 +16,45 @@
 		toast.success(message);
 		open = false;
 	}
+
+	const headers = [
+		{
+			label: 'Content title',
+			key: 'title'
+		},
+		{
+			label: 'Description',
+			key: 'description'
+		},
+		{
+			label: 'Category',
+			key: 'category'
+		},
+		{
+			label: 'Language',
+			key: 'language'
+		},
+		{
+			label: 'Provider',
+			key: 'provider'
+		},
+		{
+			label: 'Roles',
+			key: 'roles'
+		},
+		{
+			label: 'Upload date',
+			key: 'createdAt'
+		},
+		{
+			label: 'Download',
+			key: 'filePath'
+		}
+	];
 </script>
 
-<div>
-	<Card.Root class="container mx-auto mt-10 py-4">
+<section class="my-10">
+	<Card.Root class="container mx-auto max-h-180 py-4">
 		<Card.Header class="flex justify-between">
 			<div>
 				<Card.Title>Resources</Card.Title>
@@ -32,37 +69,19 @@
 				</Dialog.Content>
 			</Dialog.Root>
 		</Card.Header>
-		<Card.Content>
-			<Table.Root>
-				<Table.Caption></Table.Caption>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>Content title</Table.Head>
-						<Table.Head>Category</Table.Head>
-						<Table.Head>Roles</Table.Head>
-						<Table.Head class="text-right">Download</Table.Head>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each data.results as upload (upload.id)}
-						<Table.Row>
-							<Table.Cell class="font-medium">{upload.title}</Table.Cell>
-							<Table.Cell>{upload.category}</Table.Cell>
-							<Table.Cell>{upload.roles}</Table.Cell>
-							<Table.Cell class="text-right"
-								><Button href={`/uploads/${upload.filePath}`}>Download</Button></Table.Cell
-							>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-				<Table.Footer>
-					<!-- <Table.Row>
-						<Table.Cell colspan={3}>Total</Table.Cell>
-						<Table.Cell class="text-right">$2,500.00</Table.Cell>
-					</Table.Row> -->
-				</Table.Footer>
-			</Table.Root>
+		<Card.Content class="max-h-165 overflow-y-scroll">
+			<DataTable {headers} rows={data.results}>
+				{#snippet rowTemplate(data: any, key: string)}
+					{#if key === 'filePath'}
+						<Table.Cell><Button href={data} target="_blank">Download</Button></Table.Cell>
+					{:else if key === 'createdAt'}
+						<Table.Cell>{formatDateTime(data) || data}</Table.Cell>
+					{:else}
+						<Table.Cell>{data}</Table.Cell>
+					{/if}
+				{/snippet}
+			</DataTable>
 		</Card.Content>
 		<Card.Footer class="flex-col gap-2"></Card.Footer>
 	</Card.Root>
-</div>
+</section>
