@@ -9,5 +9,6 @@ FROM node:alpine AS dev
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate
 EXPOSE 5173
 CMD ["sh", "-c", "npm run dev -- --host"]
