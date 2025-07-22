@@ -11,9 +11,9 @@ export default $config({
     };
   },
   async run() {
-    const vpc = new sst.aws.Vpc("MyVpc", { bastion: true });
-    const rds = new sst.aws.Postgres("MyPostgres", { vpc });
-    const bucket = new sst.aws.Bucket("MyBucket", {
+    const vpc = new sst.aws.Vpc("PackVpc", { bastion: true });
+    const rds = new sst.aws.Postgres("PackPostgres", { vpc });
+    const bucket = new sst.aws.Bucket("PackBucket", {
       access: "public"
     });
 
@@ -28,9 +28,9 @@ export default $config({
       },
     });
 
-    const cluster = new sst.aws.Cluster("MyCluster", { vpc });
+    const cluster = new sst.aws.Cluster("PackCluster", { vpc });
 
-    new sst.aws.Service("MyWeb", {
+    new sst.aws.Service("PackWeb", {
       cluster,
       loadBalancer: {
         ports: [{ listen: "80/http", forward: "3000/http" }],
