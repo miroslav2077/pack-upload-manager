@@ -20,7 +20,7 @@
 		fileInput?.click();
 	}
 
-	let { data, success } = $props();
+	let { data, success, failure } = $props();
 
 	const form = superForm<UploadFormData>(data.form);
 
@@ -37,10 +37,11 @@
 	});
 
 	function handleResult({ result }: { result: any }) {
-		// Use result.data.message from `message(form, '...')`
 		if (result.type === 'success' && result.data?.form?.message) {
-			success(result.data?.form?.message);
+			return success(result.data?.form?.message);
 		}
+
+		return failure(result.data?.message || 'An unexpected error happened, try again later.');
 	}
 </script>
 

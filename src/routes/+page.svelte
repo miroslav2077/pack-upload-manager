@@ -17,6 +17,10 @@
 		open = false;
 	}
 
+	function handleFormFailure(message: string) {
+		toast.error(message);
+	}
+
 	const headers = [
 		{
 			label: 'Content title',
@@ -65,7 +69,7 @@
 					<Dialog.Header>
 						<Dialog.Title>Upload Resource</Dialog.Title>
 					</Dialog.Header>
-					<UploadForm success={handleFormSuccess} {data} />
+					<UploadForm success={handleFormSuccess} failure={handleFormFailure} {data} />
 				</Dialog.Content>
 			</Dialog.Root>
 		</Card.Header>

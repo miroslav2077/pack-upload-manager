@@ -3,8 +3,9 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { Buffer } from 'buffer';
 import { MAGIC_BYTES, MAX_FILE_SIZE } from '$lib/utils';
+import { UPLOAD_FOLDER } from '$env/static/private';
 
-const UPLOAD_DIR = path.resolve('static', 'uploads');
+const UPLOAD_DIR = path.resolve('static', UPLOAD_FOLDER);
 
 // Note: Some formats (e.g., ZIP-based Office files, AVI, WAV) require deeper inspection for strict validation.
 // This implementation allows them by magic bytes only for now.
