@@ -12,6 +12,7 @@
 	import { Input } from '$lib/components/ui/input/index';
 	import { Textarea } from '$lib/components/ui/textarea/index';
 	import { Button } from '$lib/components/ui/button/index';
+	import Spinner from './Spinner.svelte';
 
 	let fileInput = $state<HTMLElement | null>(null);
 	let selectedFile = $state<FileList | undefined>();
@@ -26,6 +27,8 @@
 
 	const { form: formData, enhance } = form;
 
+	let loading = $state(false);
+
 	const fileInfo = $derived.by(() => {
 		if (!selectedFile || selectedFile.length === 0) return null;
 		return {
@@ -37,19 +40,24 @@
 	});
 
 	function handleResult({ result }: { result: any }) {
+		loading = false;
 		if (result.type === 'success' && result.data?.form?.message) {
 			return success(result.data?.form?.message);
 		}
 
 		return failure(result.data?.message || 'An unexpected error happened, try again later.');
 	}
+	const eventsHandler = {
+		onResult: handleResult,
+		onSubmit: () => (loading = true)
+	};
 </script>
 
 <form
-	use:enhance={{ onResult: handleResult }}
+	use:enhance={eventsHandler}
 	method="POST"
 	enctype="multipart/form-data"
-	class="flex flex-col gap-1"
+	class="relative flex flex-col gap-1 {loading ? 'pointer-events-none' : ''}"
 >
 	<Form.Field {form} name="title">
 		<Form.Control>
@@ -193,4 +201,11 @@
 	<div class="mt-4 flex justify-end">
 		<Button type="submit">Upload</Button>
 	</div>
+	{#if loading}
+		<div
+			class="absolute top-0 right-0 bottom-0 left-0 flex h-full w-full items-center justify-center bg-white/70"
+		>
+			<Spinner></Spinner>
+		</div>
+	{/if}
 </form>

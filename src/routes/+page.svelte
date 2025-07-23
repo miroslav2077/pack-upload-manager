@@ -57,8 +57,8 @@
 	];
 </script>
 
-<section class="my-10">
-	<Card.Root class="container mx-auto max-h-180 py-4">
+<section class="container mx-auto px-4 py-4 sm:py-10">
+	<Card.Root class="max-h-180 py-4">
 		<Card.Header class="flex justify-between">
 			<div>
 				<Card.Title>Resources</Card.Title>
