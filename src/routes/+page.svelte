@@ -13,12 +13,12 @@
 	let open = $state<boolean>(false);
 
 	function handleFormSuccess(message: string) {
-		toast.success(message);
+		toast.success(message, { position: 'top-center' });
 		open = false;
 	}
 
 	function handleFormFailure(message: string) {
-		toast.error(message);
+		toast.error(message, { position: 'top-center' });
 	}
 
 	const headers = [
