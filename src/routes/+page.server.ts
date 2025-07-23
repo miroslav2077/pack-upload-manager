@@ -3,7 +3,11 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { UploadSchema } from '$lib/schemas';
 import prisma from '$lib/server/prisma';
 import { error } from '@sveltejs/kit';
-import { saveFileLocally } from '$lib/server/upload.js';
+import { saveFileLocally, saveFileToS3Bucket } from '$lib/server/upload.js';
+import { StorageType } from '../generated/prisma/enums';
+
+const CLOUD_STORAGE = process.env.CLOUD_STORAGE || 'false';
+const UPLOAD_FOLDER = process.env.UPLOAD_FOLDER || 'uploads';
 
 export const load = async () => {
   try {
@@ -14,7 +18,25 @@ export const load = async () => {
       take: 100,
     });
 
-    return { form, results };
+     // Get bucket name and region
+    const bucket = process.env.BUCKET_NAME;
+    const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
+
+    // add computed fileUrl
+    const resultsWithUrl = results.map((upload) => {
+      let fileUrl = '';
+
+      if (upload.storage === StorageType.CLOUD) {
+        fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${upload.filePath}`;
+      } else {
+        // serve local files from /uploads/ path
+        fileUrl = `/${UPLOAD_FOLDER}/${upload.filePath}`;
+      }
+
+      return { ...upload, filePath: fileUrl };
+    });
+
+    return { form, results: resultsWithUrl };
   } catch (err) {
     console.error('Load function failed:', err);
     throw error(500, 'Failed to load form and/or fetch uploaded resources.');
@@ -24,18 +46,47 @@ export const load = async () => {
 export const actions = {
   default: async ({ request }) => {
     const form = await superValidate(request, zod4(UploadSchema));
-    console.log(form);
 
     if (!form.valid || !form.data.file) {
-      return fail(400, { form });
+      return fail(400, { form, message: 'Form validation failed.' });
+    }
+
+    let filePath = '';
+    let storageType: StorageType = StorageType.LOCAL;
+
+    if (CLOUD_STORAGE === 'true') {
+      try {
+        filePath = await saveFileToS3Bucket(form.data.file);
+        storageType = StorageType.CLOUD;
+
+      } catch (s3Err) {
+        console.error('Cloud file upload error:', s3Err);
+        console.warn('Reverting to local file upload');
+
+        try {
+          filePath = await saveFileLocally(form.data.file);
+
+        } catch (localErr) {
+          console.error('Local file upload error:', localErr);
+          return fail(400, { form, message: localErr instanceof Error ? localErr.message : String(localErr) });
+        }
+      }
+
+    } else {
+      try {
+        filePath = await saveFileLocally(form.data.file);
+        
+      } catch (err) {
+        console.error('Local file upload error:', err);
+        return fail(400, { form, message: err instanceof Error ? err.message : String(err) });
+      }
     }
 
 
-    const filePath = await saveFileLocally(form.data.file);
-
+    
     try {
       // save data to DB
-      const dbData = { ...form.data, filePath }; // TODO implement cloud storage logic
+      const dbData = { ...form.data, filePath, originalName: form.data.file.name, mimeType: form.data.file.type, size: form.data.file.size, storage: storageType };
       delete dbData.file;
       
       await prisma.upload.create({
