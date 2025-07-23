@@ -47,7 +47,8 @@ export default $config({
         SST: 'true',
         CLOUD_STORAGE,
         BUCKET_NAME: bucket.name,
-        UPLOAD_FOLDER: 'uploads'
+        UPLOAD_FOLDER: 'uploads',
+        BODY_SIZE_LIMIT: '100M'
       },
       dev: {
         command: "npm run dev",
