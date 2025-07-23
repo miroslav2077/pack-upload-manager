@@ -115,6 +115,14 @@ This platform was built as a recruitment challenge to demonstrate:
 - The application supports multiple file formats and metadata fields  
 - **Docker** ensures consistent deployment across environments
 
+## 💔 Known Limitations & Possible Improvements
+
+- Any form of **testing** was not taken into consideration due to the limited timeframe of the assignment 😔
+- Use of **environment variables for deployment in Dockerfile** is not ideal, but passable given the scope
+- File handling could be improved (**virus scanning**, MIME type restrictions, **execution prevention**)
+- DB structure could be **normalized** and extended for **future-proofing**
+- The current implementation does not include **observability** tools, **logging** is limited and not effective
+
 ## 📚 Further Reading
 
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
