@@ -34,7 +34,7 @@
 			<Table.Row>
 				{#each headers as header (header.key)}
 					{#if rowTemplate}
-						{@render rowTemplate(row[header.key], header.key)}
+						{@render rowTemplate(row, header.key)}
 					{/if}
 				{/each}
 			</Table.Row>
