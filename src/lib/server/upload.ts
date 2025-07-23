@@ -2,26 +2,16 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { Buffer } from 'buffer';
-import { MAGIC_BYTES, MAX_FILE_SIZE } from '$lib/utils';
+import { MAX_FILE_SIZE } from '$lib/utils';
 import { createId } from '@paralleldrive/cuid2';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { filetypemime } from 'magic-bytes.js';
 
 const UPLOAD_FOLDER = process.env.UPLOAD_FOLDER || 'uploads';
 
 const UPLOAD_DIR = path.resolve('static', UPLOAD_FOLDER);
 
-// Note: Some formats (e.g., ZIP-based Office files, AVI, WAV) require deeper inspection for strict validation.
-// This implementation allows them by magic bytes only for now.
-function checkMagicBytes(buffer: Buffer): string | null {
-  for (const { mime, bytes } of MAGIC_BYTES) {
-    if (buffer.slice(0, bytes.length).every((b: number, i: number) => b === bytes[i])) {
-      return mime;
-    }
-  }
-  return null;
-}
-
-export async function saveFileLocally(file: File): Promise<string> {
+export async function validateFile(file: File): Promise<Buffer> {
   if (!(file instanceof File)) {
     throw new TypeError('Expected a File instance');
   }
@@ -32,17 +22,20 @@ export async function saveFileLocally(file: File): Promise<string> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  // Magic byte check
-  const detectedMime = checkMagicBytes(buffer);
-  if (!detectedMime) {
-    throw new Error('Unsupported or unrecognized file type.');
-  }
+  // magic byte check
+  const guessedFile = filetypemime(buffer);
 
-  // Optionally, check file.type matches detectedMime (for extra safety)
-  if (file.type && file.type !== detectedMime) {
+  // check file.type matches detectedMime (for extra safety)
+  if (!guessedFile.includes(file.type)) {
+    console.error('Mimetype mismatch!!!', file.name, file.type, guessedFile);
     throw new Error('File type does not match file content.');
   }
 
+  return buffer;
+}
+
+export async function saveFileLocally(file: File): Promise<string> {
+  const buffer = await validateFile(file);
   const safeName = file.name.replace(/[^\w.-]/g, '_'); // sanitize filename
   const filename = `${randomUUID()}_${safeName}`;
   const filepath = path.join(UPLOAD_DIR, filename);
@@ -58,8 +51,7 @@ export async function saveFileLocally(file: File): Promise<string> {
 }
 
 export async function saveFileToS3Bucket(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const buffer = await validateFile(file);
   const s3 = new S3Client({});
   const key = `${createId()}_${file.name}`;
   const command = new PutObjectCommand({
