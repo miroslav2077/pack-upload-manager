@@ -6,7 +6,7 @@ import { error } from '@sveltejs/kit';
 import { saveFileLocally, saveFileToS3Bucket } from '$lib/server/upload.js';
 import { StorageType } from '../generated/prisma/enums';
 
-const CLOUD_STORAGE = process.env.CLOUD_STORAGE || 'false';
+const CLOUD_STORAGE = process.env.CLOUD_STORAGE === 'true';
 const UPLOAD_FOLDER = process.env.UPLOAD_FOLDER || 'uploads';
 
 export const load = async () => {
@@ -48,41 +48,39 @@ export const actions = {
     const form = await superValidate(request, zod4(UploadSchema));
 
     if (!form.valid || !form.data.file) {
+      console.warn('Invalid form', form);
       return fail(400, { form, message: 'Form validation failed.' });
     }
 
     let filePath = '';
     let storageType: StorageType = StorageType.LOCAL;
 
-    if (CLOUD_STORAGE === 'true') {
+    let backupToLocalStorage = !CLOUD_STORAGE;
+
+    if (!backupToLocalStorage) {
       try {
         filePath = await saveFileToS3Bucket(form.data.file);
         storageType = StorageType.CLOUD;
 
       } catch (s3Err) {
         console.error('Cloud file upload error:', s3Err);
-        console.warn('Reverting to local file upload');
+        console.warn('Fallback to local file upload');
 
-        try {
-          filePath = await saveFileLocally(form.data.file);
-
-        } catch (localErr) {
-          console.error('Local file upload error:', localErr);
-          return fail(400, { form, message: localErr instanceof Error ? localErr.message : String(localErr) });
-        }
+        // mutating to fallback to local storage
+        backupToLocalStorage = true;
       }
+    }
 
-    } else {
+    if (backupToLocalStorage) {
       try {
         filePath = await saveFileLocally(form.data.file);
+        storageType = StorageType.LOCAL;
         
       } catch (err) {
         console.error('Local file upload error:', err);
         return fail(400, { form, message: err instanceof Error ? err.message : String(err) });
       }
     }
-
-
     
     try {
       // save data to DB
