@@ -11,15 +11,22 @@ export default $config({
     };
   },
   async run() {
+    // networking
     const vpc = new sst.aws.Vpc("PackVpc", { bastion: true });
+    // stacking
+    const cluster = new sst.aws.Cluster("PackCluster", { vpc });
+    // database
     const rds = new sst.aws.Postgres("PackPostgres", { vpc });
+    // storage
     const bucket = new sst.aws.Bucket("PackBucket", {
       access: "public"
     });
 
+    // environment variables
     const DATABASE_URL = $interpolate`postgresql://${rds.username}:${rds.password}@${rds.host}:${rds.port}/${rds.database}`;
     const CLOUD_STORAGE = 'true';
     
+    // db tool
     new sst.x.DevCommand("Prisma", {
       environment: { DATABASE_URL },
       dev: {
@@ -28,18 +35,27 @@ export default $config({
       },
     });
 
-    const cluster = new sst.aws.Cluster("PackCluster", { vpc });
-
-    new sst.aws.Service("PackWeb", {
+    // sveltekit runtime
+    const webApp = new sst.aws.Service("PackWeb", {
       cluster,
       loadBalancer: {
         ports: [{ listen: "80/http", forward: "3000/http" }],
       },
       link: [bucket, rds],
-      environment: { DATABASE_URL, SST: 'true', CLOUD_STORAGE, BUCKET_NAME: bucket.name },
+      environment: {
+        DATABASE_URL,
+        SST: 'true',
+        CLOUD_STORAGE,
+        BUCKET_NAME: bucket.name,
+        UPLOAD_FOLDER: 'uploads'
+      },
       dev: {
         command: "npm run dev",
       },
     });
+
+    return {
+      url: webApp.url
+    }
   },
 });
