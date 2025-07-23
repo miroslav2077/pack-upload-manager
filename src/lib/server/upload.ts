@@ -3,7 +3,10 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { Buffer } from 'buffer';
 import { MAGIC_BYTES, MAX_FILE_SIZE } from '$lib/utils';
-import { UPLOAD_FOLDER } from '$env/static/private';
+import { createId } from '@paralleldrive/cuid2';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+
+const UPLOAD_FOLDER = process.env.UPLOAD_FOLDER || 'uploads';
 
 const UPLOAD_DIR = path.resolve('static', UPLOAD_FOLDER);
 
@@ -18,7 +21,7 @@ function checkMagicBytes(buffer: Buffer): string | null {
   return null;
 }
 
-export async function saveFileLocally(file: FormDataEntryValue): Promise<string> {
+export async function saveFileLocally(file: File): Promise<string> {
   if (!(file instanceof File)) {
     throw new TypeError('Expected a File instance');
   }
@@ -52,4 +55,20 @@ export async function saveFileLocally(file: FormDataEntryValue): Promise<string>
     console.error('Failed to save file locally:', err);
     throw new Error('Unable to save file');
   }
+}
+
+export async function saveFileToS3Bucket(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const s3 = new S3Client({});
+  const key = `${createId()}_${file.name}`;
+  const command = new PutObjectCommand({
+    Key: key,
+    Bucket: process.env.BUCKET_NAME,
+    Body: buffer,
+    ContentType: file.type
+  });
+
+  await s3.send(command);
+  return key;
 }
