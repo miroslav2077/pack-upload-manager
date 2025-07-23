@@ -75,7 +75,7 @@
 				</Dialog.Content>
 			</Dialog.Root>
 		</Card.Header>
-		<Card.Content class="max-h-165 overflow-y-scroll">
+		<Card.Content class="max-h-165 overflow-y-auto">
 			<DataTable {headers} rows={data.results}>
 				{#snippet rowTemplate(data: any, key: string)}
 					{#if key === 'filePath'}
