@@ -117,6 +117,7 @@ This platform was built as a recruitment challenge to demonstrate:
 
 ## 💔 Known Limitations & Possible Improvements
 
+- In-platform **file previewer**
 - Any form of **testing** was not taken into consideration due to the limited timeframe of the assignment 😔
 - Use of **environment variables for deployment in Dockerfile** is not ideal, but passable given the scope
 - File handling could be improved (**virus scanning**, MIME type restrictions, **execution prevention**)
