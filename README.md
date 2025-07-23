@@ -1,6 +1,9 @@
 # 📁 File Upload Platform
 
-A modern file upload platform built with SvelteKit, featuring content management with metadata collection and cloud storage integration.
+A modern file upload platform built with [SvelteKit](https://kit.svelte.dev), featuring content management with metadata collection and cloud storage integration using [SST](https://docs.sst.dev/) and [AWS](https://aws.amazon.com/).
+
+> ⚠️ **AWS is required** for both development and production.  
+> This project relies on live AWS infrastructure (e.g., RDS, S3) even during local development via [SST tunnels](https://docs.sst.dev/docs/environment/tunnel).
 
 ## 🚀 Quick Start
 
@@ -15,7 +18,7 @@ npm i
 # Generate Prisma client
 npx prisma generate
 
-# Start development server
+# Start development server (requires AWS credentials)
 npx sst dev
 ```
 
@@ -26,7 +29,7 @@ That's it! Your dev environment should be running at `http://localhost:5173` �
 When you need to update your database schema:
 
 ```bash
-# Open tunnel for database access
+# Open tunnel for database access (uses live RDS on AWS)
 npx sst tunnel
 
 # In another terminal, run migrations
@@ -79,12 +82,12 @@ These ensure proper request forwarding and origin handling behind the load balan
 
 ## 🏗️ Tech Stack
 
-- **Frontend**: SvelteKit + TypeScript
+- **Frontend**: [SvelteKit](https://kit.svelte.dev) + [TypeScript](https://www.typescriptlang.org/)
 - **Backend**: SvelteKit API routes
-- **Database**: PostgreSQL (via Prisma)
-- **Infrastructure**: AWS (via SST v3)
-- **File Storage**: AWS S3
-- **Deployment**: Docker + AWS ECS/Lambda
+- **Database**: [PostgreSQL](https://www.postgresql.org/) (via [Prisma](https://www.prisma.io/docs))
+- **Infrastructure**: [AWS](https://aws.amazon.com/) (via [SST v3](https://docs.sst.dev))
+- **File Storage**: [Amazon S3](https://docs.aws.amazon.com/s3/)
+- **Deployment**: Docker + AWS ECS or Lambda
 
 ## 📝 About This Project
 
@@ -106,11 +109,19 @@ This platform was built as a recruitment challenge to demonstrate:
 
 ## 🔧 Development Notes
 
-- The project uses SST v3 for infrastructure as code
-- Prisma handles database schema and migrations
-- File uploads are processed and stored in S3
-- The application supports multiple file formats and metadata fields
-- Docker ensures consistent deployment across environments
+- The project uses **SST v3** for infrastructure as code  
+- **Prisma** handles database schema and migrations  
+- File uploads are processed and stored in **S3**  
+- The application supports multiple file formats and metadata fields  
+- **Docker** ensures consistent deployment across environments
+
+## 📚 Further Reading
+
+- [SvelteKit Docs](https://kit.svelte.dev/docs)
+- [SST v3 Docs](https://docs.sst.dev/)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [AWS Documentation](https://docs.aws.amazon.com/)
+- [Dockerfile Best Practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
 
 ## 🤝 Need Help?
 
@@ -118,7 +129,7 @@ If you encounter any issues:
 
 1. Make sure all dependencies are installed: `npm i`
 2. Ensure Prisma client is generated: `npx prisma generate`
-3. Check that your AWS credentials are configured
+3. Check that your **AWS credentials** are configured
 4. Verify database connections with `npx sst tunnel`
 
 Happy coding! 💻✨
