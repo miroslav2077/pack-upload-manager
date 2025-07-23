@@ -102,8 +102,7 @@ This platform was built as a recruitment challenge to demonstrate:
 ✅ **Content Table** with sorting and filtering  
 ✅ **File Preview/Download** functionality  
 ✅ **Metadata Management** (title, description, category, language, provider, roles)  
-✅ **Cloud Storage** integration  
-✅ **Responsive Design** following provided mockups  
+✅ **Cloud Storage** integration
 
 ## 🔧 Development Notes
 
