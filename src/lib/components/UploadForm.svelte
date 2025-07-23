@@ -177,7 +177,6 @@
 			{#snippet children({ props })}
 				<div class="flex items-center gap-2">
 					<Input
-						{...props}
 						type="text"
 						placeholder="No file selected*"
 						value={fileInfo ? `${fileInfo.name} (${fileInfo.size})` : ''}
