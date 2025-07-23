@@ -23,10 +23,10 @@ export const UploadSchema = z.object({
   .default([]),
   file: z
     .any()
-    .refine((file) => file instanceof File && file.size > 0, {
+    .refine((file) => file instanceof File && file?.size > 0, {
       message: 'File is required',
     })
-    .refine((file) => file.size <= MAX_FILE_SIZE, {
+    .refine((file) => file instanceof File && file?.size <= MAX_FILE_SIZE, {
       message: 'File must be smaller than 80MB',
     }),
 });
